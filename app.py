@@ -125,10 +125,6 @@ def delete_ledger():
     return {'Info': f"Deleted ledger named '{name}'"}
 
 
-if __name__ == "__main__":
-    app.run()
-
-
 """
 This endpoint updates a ledger instance. It expects the following arguments:
 - name: name of the algorithm
@@ -177,4 +173,8 @@ def update_ledger():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+    
+
+if __name__ == "__main__":
+    app.run()
     
