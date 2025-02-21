@@ -59,4 +59,3 @@ if __name__ == '__main__':
     url2 = 'https://github.com/Wat-Street/money-making'
     url3 = 'https://github.com/Wat-Street/money-making/tree/harv-extension'
     recursive_repo_clone(url)
-    
