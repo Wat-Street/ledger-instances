@@ -1,9 +1,10 @@
 import os, glob
 from flask import Flask, jsonify, request
-from sqlalchemy import select, insert, delete
+from sqlalchemy import select, insert, delete, update
 from utils.db_config import get_db_connection, ledger
 from utils.docker_utils import build_docker_image, run_docker_container, stop_docker_container
 from utils.github_utils import recursive_repo_clone
+from datetime import datetime
 
 ORDERBOOKS_TABLE_NAME = 'order_books_v2'
 
@@ -132,6 +133,57 @@ def delete_ledger():
 
     return {'Info': f"Deleted ledger named '{name}'"}
 
+
+"""
+This endpoint updates a ledger instance. It expects the following arguments:
+- name: name of the algorithm
+- trades: list of trades
+- value: dict of current stock values
+- balance: current balance 
+This function takes the output of a model’s trade function and updates the corresponding ledger instance’s record.
+"""
+
+
+@app.route("/update_ledger", methods=['POST'])
+def update_ledger():
+    name = request.json.get('name')
+    new_trades = request.json.get('trades', [])
+    new_value = request.json.get('value', {})
+    new_balance = request.json.get('balance')
+    timestamp=datetime.now(datetime.UTC) # pass to view_ledger so that timestamp can be displayed
+
+    try:
+        with get_db_connection() as conn:
+            # fetch current ledger data
+            stmt = select(ledger).where(ledger.c.name == name)
+            result = conn.execute(stmt).fetchone()
+
+            if not result:
+                return jsonify({"error": f"You are trying to update a ledger called '{name}' that does not exist."}), 404
+
+            # update trades
+            updated_trades = result.trades + new_trades
+
+            # calculate the current worth = balance + value of stocks
+            # stock value is calculated by accessing the current stock value for a given ticker multipled by the number of tickers to track
+            stock_value = sum(new_value[ticker] * result.tickers_to_track.count(ticker) for ticker in new_value)
+            updated_worth = result.balance + stock_value 
+
+            # update ledger in database
+            update_stmt = update(ledger).where(ledger.c.name == name).values(
+                trades=updated_trades,
+                worth=updated_worth,
+                balance=new_balance
+            )
+            conn.execute(update_stmt)
+            conn.commit()
+
+        return jsonify({"message": f"Ledger '{name}' updated successfully"}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    
 
 if __name__ == "__main__":
     app.run()
