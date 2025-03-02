@@ -133,5 +133,32 @@ def delete_ledger():
     return {'Info': f"Deleted ledger named '{name}'"}
 
 
+@app.route("/start_ledger", methods=['POST'])
+def start_ledger():
+    """
+    This endpoint starts a ledger instance.
+    Expects: name of algorithm.
+    This function starts the task scheduling for the model using Huey.
+    """
+    name = request.args.get('name')
+
+    with get_db_connection() as conn:
+        stmt = select(
+            ledger.c.name,
+            ledger.c.update_time,
+            ledger.c.algo_link,
+            ledger.c.end_duration
+        ).where(ledger.c.name == name)
+        result = conn.execute(stmt).fetchone()
+    
+    if not result:
+        return {"Error": f"Ledger {name} does not exist."}, 404
+    
+    from utils.tasks import run_ledger_trade
+
+    run_ledger_trade(result.name, result.algo_link, result.update_time, result.end_duration)
+    
+    return {f"Ledger {name} will now start"}, 202
+
 if __name__ == "__main__":
     app.run()

@@ -10,7 +10,7 @@ huey = RedisHuey('ledger-tasks', host='localhost', port=6379)
 
 
 @huey.task()
-def execute_trade_cycle(name, image_path, tickers, update_time, end_duration, start_time):
+def execute_trade_cycle(name, image_path, update_time, end_duration, start_time):
     """
     Execute a single trade and schedule the next one if not past the end time.
     This task recursively schedules itself
@@ -50,13 +50,13 @@ def execute_trade_cycle(name, image_path, tickers, update_time, end_duration, st
     print(f"Scheduling next trade for '{name}' at {next_run}")
 
     execute_trade_cycle.schedule(
-        args=(name, image_path, tickers, update_time, end_duration, start_time),
+        args=(name, image_path, update_time, end_duration, start_time),
         eta=next_run
     )
 
 
 @huey.task()
-def run_ledger_trade(name, image_path, tickers, update_time, end_duration):
+def run_ledger_trade(name, image_path, update_time, end_duration):
     """
     Start the trading cycle for a ledger.
     This is the entry point task that initiates the recursive cycle.
@@ -64,7 +64,7 @@ def run_ledger_trade(name, image_path, tickers, update_time, end_duration):
     start_time = datetime.now()
     print(f"Initiating trading cycle for ledger '{name}' at {start_time}")
 
-    execute_trade_cycle(name, image_path, tickers,
+    execute_trade_cycle(name, image_path,
                         update_time, end_duration, start_time)
 
     return {
