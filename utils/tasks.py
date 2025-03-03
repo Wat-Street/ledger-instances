@@ -34,13 +34,12 @@ def execute_trade_cycle(name, image_path, update_time, end_duration, start_time)
     try:
         print(f"Executing trade for ledger '{name}'")
 
-        # Run the docker container
-        container = run_docker_container(
-            image_name=name,
-            command="python model.py trade"
+        output = run_docker_container(
+            image_name=image_path,
+            command=None
         )
 
-        logs = container.logs().decode('utf-8')
+        logs = output.decode('utf-8')
         print(f"Trade execution completed for '{name}'. Logs: {logs}")
 
     except Exception as e:
