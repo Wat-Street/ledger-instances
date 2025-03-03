@@ -1,8 +1,8 @@
 import time
 from datetime import datetime, timedelta
 
-from db_config import get_db_connection, ledger
-from docker_utils import run_docker_container, stop_docker_container
+from utils.db_config import get_db_connection, ledger
+from utils.docker_utils import run_docker_container, stop_docker_container
 from huey import RedisHuey
 from sqlalchemy import select, update
 
