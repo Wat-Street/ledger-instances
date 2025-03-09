@@ -155,7 +155,7 @@ This function takes the output of a model’s trade function and updates the cor
 """
 
 
-@app.route("/update_ledger", methods=["POST"])
+@app.route("/update_ledger", methods=["PATCH"])
 def update_ledger():
     data = request.json
     name = data.get("name")
@@ -167,14 +167,7 @@ def update_ledger():
 
     # Validate required fields
     if None in [name, new_trades, new_holdings]:
-        return (
-            jsonify(
-                {
-                    "error": "Missing required fields. Please provide name, trades, and holding."
-                }
-            ),
-            400,
-        )
+        return jsonify({"error": "Missing required fields. Please provide name, trades, and holding."}), 400
 
     try:
         with get_db_connection() as conn:
@@ -183,14 +176,7 @@ def update_ledger():
             result = conn.execute(stmt).fetchone()
 
             if not result:
-                return (
-                    jsonify(
-                        {
-                            "error": f"You are trying to update a ledger called '{name}' that does not exist."
-                        }
-                    ),
-                    404,
-                )
+                return jsonify({"error": f"You are trying to update a ledger called '{name}' that does not exist."}), 404
 
             # update trades
             updated_trades = result.trades + new_trades
