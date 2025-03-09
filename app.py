@@ -8,6 +8,7 @@ from utils.docker_utils import (
     stop_docker_container,
 )
 from utils.github_utils import recursive_repo_clone
+from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
 from datetime import datetime
 import yfinance as yf
 
@@ -165,7 +166,7 @@ def update_ledger():
         datetime.UTC
     )  # pass to view_ledger so that timestamp can be displayed
 
-    # Validate required fields
+    # validate required fields
     if None in [name, new_trades, new_holdings]:
         return jsonify({"error": "Missing required fields. Please provide name, trades, and holding."}), 400
 
@@ -206,48 +207,6 @@ def update_ledger():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
-
-
-def calculate_new_balance(current_balance, new_trades):
-    """Calculate new balance based on trades"""
-    for trade in new_trades:
-        if trade["type"] == "buy":
-            current_balance -= trade["price"] * trade["quantity"]
-        else:  # sell
-            current_balance += trade["price"] * trade["quantity"]
-    return current_balance
-
-
-def get_current_price(ticker):
-    """Helper function to get current price using yfinance"""
-    try:
-        ticker_obj = yf.Ticker(ticker)
-        # Get the current market price (last closing price)
-        current_price = ticker_obj.info["regularMarketPrice"]
-        return float(current_price)
-    except Exception as e:
-        print(f"Error fetching price for {ticker}: {e}")
-        raise RuntimeError(f"Failed to get current price for {ticker}")
-
-
-def calculate_total_value(holdings, balance):
-    """Helper function to calculate total portfolio value"""
-    if not holdings:
-        return balance
-
-    stock_value = 0
-    for ticker, quantity in holdings.items():
-        try:
-            current_price = get_current_price(ticker)
-            stock_value += quantity * current_price
-        except Exception as e:
-            print(f"Error calculating value for {ticker}: {e}")
-            raise RuntimeError(
-                f"Failed to calculate portfolio value due to error with {ticker}"
-            )
-
-    return balance + stock_value
-
 
 if __name__ == "__main__":
     app.run()
