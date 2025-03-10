@@ -72,19 +72,7 @@ Some considerations:
   ],
 }
 ```
-#### Updating Book In Model
-```
-{
-  "portfolio": {
-    "GOOG": 9,
-    "AAPL": 10,
-    "MSFT": 34,
-    "AMZN": 4
-  },
-  "balance": 68208
-}
 
-```
 
 #### View Book
 ```
@@ -94,14 +82,16 @@ Some considerations:
     {"type": "sell", "ticker": "AAPL", "price": 157, "quantity": 7},
     {"type": "buy", "ticker": "GOOG", "price": 112, "quantity": 9}
   ],
-  “holding”: {
+  "holding": {
     "GOOG": 9,
-    "AAPL": 10,
-    "MSFT": 34,
-    "AMZN": 4
-  }.
-  "value": [80000, 81000, 83000, 80000],
-  "balance": 78549
+    "AAPL": 1,
+  },
+  "value": [
+        "1999-01-08 04:05:06": 100000,
+        "1999-01-08 04:10:06": 100800,
+        "1999-01-08 04:15:06": 109000,
+  ],
+  "balance": 96,485
 }
 ```
 
