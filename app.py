@@ -1,4 +1,5 @@
-import os, glob
+import os
+import glob
 from flask import Flask, jsonify, request
 from sqlalchemy import select, insert, delete, update
 from utils.db_config import get_db_connection, ledger
@@ -6,7 +7,7 @@ from utils.docker_utils import build_docker_image, run_docker_container, stop_do
 from utils.github_utils import recursive_repo_clone
 from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
 from utils.ledger_manager import start_ledger
-from datetime import datetime
+from datetime import datetime, timezone
 import yfinance as yf
 
 ORDERBOOKS_TABLE_NAME = "order_books_v2"
@@ -40,7 +41,8 @@ def create_ledger():
         # pull algorithm into local
         temp_model_store = "temporary_model_storage"
         recursive_repo_clone(algo_path, temp_model_store)
-        print(f"Successfully pulled algo {name} repo to temporary model storage")
+        print(
+            f"Successfully pulled algo {name} repo to temporary model storage")
 
         # paths to pull algorithm and store image
         path_to_algo = f"{temp_model_store}"
@@ -154,15 +156,14 @@ def update_ledger():
     - trades: list of trades
     - value: dict of current stock values
     - balance: current balance 
-    This function takes the output of a model’s trade function and updates the corresponding ledger instance’s record.
+    This function takes the output of a model's trade function and updates the corresponding ledger instance's record.
     """
     data = request.json
     name = data.get("name")
     new_trades = data.get("trades")
     new_holdings = data.get("holding")
-    timestamp = datetime.now(
-        datetime.UTC
-    )  # pass to view_ledger so that timestamp can be displayed
+    # pass to view_ledger so that timestamp can be displayed
+    timestamp = datetime.now(timezone.utc)
 
     # validate required fields
     if None in [name, new_trades, new_holdings]:

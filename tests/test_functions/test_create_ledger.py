@@ -49,7 +49,6 @@ def test_create_ledger_success(client, mock_db_connection, mock_dependencies):
 
     response = client.get('/create_ledger', query_string=test_params)
 
-    # Assert response
     assert response.status_code == 200
     assert b"has been created" in response.data
 
@@ -68,7 +67,6 @@ def test_create_ledger_missing_parameters(client):
 
 
 def test_create_ledger_error(client, mock_dependencies):
-    # Mock recursive_repo_clone to raise an exception
     mock_dependencies['clone'].side_effect = Exception(
         "Failed to clone repository")
 
