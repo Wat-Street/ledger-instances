@@ -8,7 +8,3 @@ def mock_db_connection():
         mock_conn = MagicMock()
         mock_get_db_connection.return_value.__enter__.return_value = mock_conn
         yield mock_conn
-
-
-
-
