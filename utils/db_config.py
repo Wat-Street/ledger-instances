@@ -28,7 +28,8 @@ ledger = Table(
     Column("update_time", Integer, nullable=False),
     Column("end_duration", Integer, nullable=False),
     Column("trades", JSONB, server_default="[]"),
-    Column("worth", JSONB, server_default="{}"),
+    Column("holding", JSONB, server_default="{}"),
+    Column("value", JSONB, server_default="{}"),
     Column("balance", NUMERIC, nullable=False, server_default="100000"),
     Column("created_at", TIMESTAMP, server_default="CURRENT_TIMESTAMP"),
 )
