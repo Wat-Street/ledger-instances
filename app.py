@@ -94,14 +94,14 @@ def view_ledger():
     """
     This endpoint allows you to view a ledger.
     Expects: name of algorithm.
-    Returns: a json containing the trades, holdings, worth history, and balance of the ledger.
+    Returns: a json containing the trades, holdings, value history, and balance of the ledger.
     """
     name = request.args.get("name")
 
     # retrieve ledger from database
     with get_db_connection() as conn:
         stmt = select(
-            ledger.c.trades, ledger.c.holding, ledger.c.worth, ledger.c.balance
+            ledger.c.trades, ledger.c.holding, ledger.c.value, ledger.c.balance
         ).where(ledger.c.name == name)
         result = conn.execute(stmt).fetchone()
 
@@ -111,7 +111,7 @@ def view_ledger():
             {
                 "trades": result.trades,
                 "holding": result.holding,
-                "worth": result.worth,
+                "value": result.value,
                 "balance": result.balance,
             }
         )
@@ -195,7 +195,7 @@ def update_ledger():
                     trades=updated_trades,
                     holding=new_holdings,
                     balance=new_balance,
-                    worth={str(timestamp): current_value, **result.worth},
+                    value={str(timestamp): current_value, **result.value},
                 )
             )
             conn.execute(update_stmt)
