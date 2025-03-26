@@ -3,12 +3,22 @@ import glob
 from flask import Flask, jsonify, request
 from sqlalchemy import select, insert, delete, update
 from utils.db_config import get_db_connection, ledger
-from utils.docker_utils import build_docker_image, run_docker_container, stop_docker_container
+from utils.docker_utils import (
+    build_docker_image,
+    run_docker_container,
+    stop_docker_container,
+)
 from utils.github_utils import recursive_repo_clone
-from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
+from utils.ledger_utils import (
+    calculate_new_balance,
+    get_current_price,
+    calculate_total_value,
+)
 from utils.ledger_manager import start_ledger
 from datetime import datetime, timezone
 import yfinance as yf
+
+API_KEY = os.environ.get("LEDGER_API_KEY")
 
 ORDERBOOKS_TABLE_NAME = "order_books_v2"
 
@@ -41,8 +51,7 @@ def create_ledger():
         # pull algorithm into local
         temp_model_store = "temporary_model_storage"
         recursive_repo_clone(algo_path, temp_model_store)
-        print(
-            f"Successfully pulled algo {name} repo to temporary model storage")
+        print(f"Successfully pulled algo {name} repo to temporary model storage")
 
         # paths to pull algorithm and store image
         path_to_algo = f"{temp_model_store}"
@@ -79,10 +88,15 @@ def create_ledger():
             conn.execute(stmt)
             conn.commit()
 
-        # start ledger after creation
+        # start ledger after creation - use internal call directly instead of endpoint
         response, status_code = start_ledger(name)
 
-        return jsonify({"info": f"Ledger '{name}' has been created.", "start_status": response}), status_code
+        return (
+            jsonify(
+                {"info": f"Ledger '{name}' has been created.", "start_status": response}
+            ),
+            status_code,
+        )
 
     except Exception as e:
         print(e)
@@ -151,13 +165,18 @@ def delete_ledger():
 @app.route("/update_ledger", methods=["PATCH"])
 def update_ledger():
     """
+    PRIVATE ENDPOINT - Requires valid API key.
     This endpoint updates a ledger instance. It expects the following arguments:
     - name: name of the algorithm
     - trades: list of trades
     - value: dict of current stock values
-    - balance: current balance 
+    - balance: current balance
     This function takes the output of a model's trade function and updates the corresponding ledger instance's record.
     """
+    # validate API key
+    if not validate_api_key():
+        return jsonify({"error": "Unauthorized access. Valid API key required."}), 401
+
     data = request.json
     name = data.get("name")
     new_trades = data.get("trades")
@@ -167,7 +186,14 @@ def update_ledger():
 
     # validate required fields
     if None in [name, new_trades, new_holdings]:
-        return jsonify({"error": "Missing required fields. Please provide name, trades, and holding."}), 400
+        return (
+            jsonify(
+                {
+                    "error": "Missing required fields. Please provide name, trades, and holding."
+                }
+            ),
+            400,
+        )
 
     try:
         with get_db_connection() as conn:
@@ -176,7 +202,14 @@ def update_ledger():
             result = conn.execute(stmt).fetchone()
 
             if not result:
-                return jsonify({"error": f"You are trying to update a ledger called '{name}' that does not exist."}), 404
+                return (
+                    jsonify(
+                        {
+                            "error": f"You are trying to update a ledger called '{name}' that does not exist."
+                        }
+                    ),
+                    404,
+                )
 
             # update trades
             updated_trades = result.trades + new_trades
@@ -206,6 +239,36 @@ def update_ledger():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/start_ledger", methods=["GET"])
+def start_ledger_endpoint():
+    """
+    PRIVATE ENDPOINT - Requires valid API key.
+    This endpoint starts a ledger instance.
+    Expects: name of the ledger to start.
+    """
+    # Validate API key
+    if not validate_api_key():
+        return jsonify({"error": "Unauthorized access. Valid API key required."}), 401
+
+    name = request.args.get("name")
+    if not name:
+        return jsonify({"error": "Missing required parameter: name"}), 400
+
+    response, status_code = start_ledger(name)
+    return jsonify(response), status_code
+
+
+def validate_api_key():
+    """Validates the API key provided in the request headers."""
+    # Get API key from header
+    provided_key = request.headers.get("X-API-Key")
+
+    # Compare with stored API key
+    if not provided_key or provided_key != API_KEY:
+        return False
+    return True
 
 
 if __name__ == "__main__":
