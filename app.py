@@ -127,13 +127,15 @@ def delete_ledger():
     """
     name = request.args.get("name")
 
+    if not name:
+        return {
+                "Error": f"You did not specify a ledger name. Usage: `/delete_ledger?name=insert_name`"
+            }, 400
+
     with get_db_connection() as conn:
         # check if the ledger exists in the database
         stmt = select(ledger.c.name).where(ledger.c.name == name)
         result = conn.execute(stmt).fetchone()
-
-        print(result)
-        print(f"DELETE FROM {ORDERBOOKS_TABLE_NAME} WHERE name = '{name}';")
 
         if not result:
             return {
