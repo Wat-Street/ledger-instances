@@ -3,9 +3,9 @@ import glob
 from flask import Flask, jsonify, request
 from sqlalchemy import select, insert, delete, update
 from utils.db_config import get_db_connection, ledger
-from utils.docker_utils import (build_docker_image, run_docker_container, stop_docker_container)
+from utils.docker_utils import build_docker_image, run_docker_container, stop_docker_container
 from utils.github_utils import recursive_repo_clone
-from utils.ledger_utils import (calculate_new_balance, get_current_price, calculate_total_value)
+from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
 from utils.ledger_manager import start_ledger
 from datetime import datetime, timezone
 import yfinance as yf
