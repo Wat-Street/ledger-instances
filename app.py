@@ -137,9 +137,6 @@ def delete_ledger():
         stmt = select(ledger.c.name).where(ledger.c.name == name)
         result = conn.execute(stmt).fetchone()
 
-        # print(result)
-        # print(f"DELETE FROM {ORDERBOOKS_TABLE_NAME} WHERE name = '{name}';")
-
         if not result:
             return {
                 "Error": f"You are trying to delete a ledger called '{name}' that does not exist."
