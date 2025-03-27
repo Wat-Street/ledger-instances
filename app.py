@@ -10,6 +10,8 @@ from utils.ledger_manager import start_ledger
 from datetime import datetime, timezone
 import yfinance as yf
 
+API_KEY = os.environ.get("LEDGER_API_KEY")
+
 ORDERBOOKS_TABLE_NAME = "order_books_v2"
 
 
@@ -153,6 +155,7 @@ def delete_ledger():
 @app.route("/update_ledger", methods=["PATCH"])
 def update_ledger():
     """
+    PRIVATE ENDPOINT - Requires valid API key.
     This endpoint updates a ledger instance. It expects the following arguments:
     - name: name of the algorithm
     - trades: list of trades
@@ -160,6 +163,10 @@ def update_ledger():
     - balance: current balance 
     This function takes the output of a model's trade function and updates the corresponding ledger instance's record.
     """
+    # validate API key
+    if not validate_api_key():
+        return jsonify({"error": "Unauthorized access. Valid API key required."}), 401
+
     data = request.json
     name = data.get("name")
     new_trades = data.get("trades")
@@ -208,6 +215,36 @@ def update_ledger():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/start_ledger", methods=["GET"])
+def start_ledger_endpoint():
+    """
+    PRIVATE ENDPOINT - Requires valid API key.
+    This endpoint starts a ledger instance.
+    Expects: name of the ledger to start.
+    """
+    # Validate API key
+    if not validate_api_key():
+        return jsonify({"error": "Unauthorized access. Valid API key required."}), 401
+
+    name = request.args.get("name")
+    if not name:
+        return jsonify({"error": "Missing required parameter: name"}), 400
+
+    response, status_code = start_ledger(name)
+    return jsonify(response), status_code
+
+
+def validate_api_key():
+    """Validates the API key provided in the request headers."""
+    # Get API key from header
+    provided_key = request.headers.get("X-API-Key")
+
+    # Compare with stored API key
+    if not provided_key or provided_key != API_KEY:
+        return False
+    return True
 
 
 if __name__ == "__main__":
