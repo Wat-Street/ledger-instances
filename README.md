@@ -32,6 +32,42 @@ Ledger instances allow the ML team to forward-test their algorithms. An API and 
   
     Example command: `https://watstreet/delete_ledger?name=krishalgo`
 
+4. **`update_ledger`** (Protected Endpoint)
+   To update a ledger's trades and holdings. Requires API key in X-API-Key header.
+
+    Expected arguments (JSON body):
+
+    - `name`: name of ledger
+    - `trades`: list of new trades
+    - `holding`: updated holdings dictionary
+
+    Example command:
+
+    ```bash
+    curl -X PATCH https://watstreet/update_ledger \
+         -H "Content-Type: application/json" \
+         -H "X-API-Key: your-api-key" \
+         -d '{
+           "name": "krishalgo",
+           "trades": [{"type": "buy", "ticker": "AAPL", "price": 176, "quantity": 8}],
+           "holding": {"AAPL": 8, "GOOG": 0}
+         }'
+    ```
+
+5. **`start_ledger`** (Protected Endpoint)
+   To start a ledger instance. Requires API key in X-API-Key header.
+
+    Expected arguments:
+
+    - `name`: name of ledger to start
+
+    Example command:
+
+    ```bash
+    curl -X GET https://watstreet/start_ledger?name=krishalgo \
+         -H "X-API-Key: your-api-key"
+    ```
+
 ## Interaction with Models
 The two standard commands are:
 - `trade()`: runs the algorithm and, based on current ownership of stocks and balance, will return a trade
