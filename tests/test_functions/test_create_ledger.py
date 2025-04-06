@@ -1,7 +1,7 @@
 import pytest
 from app import app
 from unittest.mock import patch, Mock
-from tests.fixtures.fixture_artifact import client
+from tests.conftest import client
 from tests.conftest import mock_db_connection, mock_dependencies
 
 
