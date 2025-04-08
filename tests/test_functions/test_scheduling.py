@@ -6,7 +6,7 @@ from utils.tasks import run_ledger_trade, execute_trade_cycle
 # test 1: call execute_trade_cycle with correct arguments
 @patch("utils.tasks.execute_trade_cycle")
 def test_run_ledger_trade_starts_cycle(mock_execute):
-    result = run_ledger_trade("ledger1", "image", 15, 2)
+    result = run_ledger_trade.call_local("ledger1", "image", 15, 2)
 
     # assert thtat result was called with exepected args
     mock_execute.assert_called_once()
@@ -37,7 +37,7 @@ def test_execute_trade_cycle_schedules_next(mock_datetime, mock_db, mock_docker,
     mock_docker.return_value = b"docker logs"
 
     start_time = now - timedelta(minutes=5)
-    execute_trade_cycle("ledger1", "image", 10, 1, start_time)
+    execute_trade_cycle.call_local("ledger1", "image", 10, 1, start_time)
 
     mock_docker.assert_called_once_with(image_name="image", command=None)
     mock_schedule.assert_called_once()
