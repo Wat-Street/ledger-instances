@@ -53,7 +53,7 @@ def test_execute_trade_cycle_past_end_time(mock_datetime):
     now = datetime(2025, 4, 5, 12, 0)
     mock_datetime.now.return_value = now
     # forward all arguments to the real datetime constructor to preserve normal behavior when mocking
-    mock_datetime.side_effect = lambda *args, **kwargs: datetime(*a, **k)
+    mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
 
     start_time = datetime(2000, 1, 1)
     result = execute_trade_cycle.call_local("ledger1", "image", 10, 1, start_time)
