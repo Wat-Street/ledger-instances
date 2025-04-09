@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch, MagicMock, Mock
 from app import app
 
+
 @pytest.fixture
 def client():
     """Creating the test client"""
@@ -36,3 +37,10 @@ def mock_dependencies():
             'start_ledger': mock_start_ledger,
             'open': mock_open
         }
+
+
+@pytest.fixture(autouse=True)
+def mock_api_key_validation():
+    with patch('app.validate_api_key') as mock_validate:
+        mock_validate.return_value = True
+        yield mock_validate
