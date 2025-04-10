@@ -19,7 +19,8 @@ def test_update_ledger_nonexistent_ledger(client, mock_db_connection):
     response = client.patch(
         "/update_ledger",
         data=json.dumps(test_params),
-        content_type='application/json'
+        content_type='application/json',
+        headers={'X-API-Key': 'test-key'}
     )
 
     mock_db_connection.execute.assert_called()
@@ -37,7 +38,8 @@ def test_update_ledger_missing_fields(client, mock_db_connection):
     response = client.patch(
         "/update_ledger",
         data=json.dumps(test_params),
-        content_type='application/json'
+        content_type='application/json',
+        headers={'X-API-Key': 'test-key'}
     )
 
     mock_db_connection.execute.assert_not_called()
