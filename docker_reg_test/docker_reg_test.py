@@ -1,4 +1,7 @@
+import sys
 import docker
+
+sys.path.append('..')
 from utils.docker_utils import get_docker_client
 
 
@@ -13,9 +16,12 @@ def tag_and_push_image():
     Tags a Docker image with a new name/tag and pushes it to a registry.
     """
     image_name = "alpine:latest"
-    target_image = f"{registry}/my-alpine:latest"
+    target_image = f"{registry}/test-alpine:latest"
     try:
         client = get_docker_client()
+
+        # Ensure image is pulled
+        client.images.pull(image_name)
         
         # Tag the image
         image = client.images.get(image_name)
@@ -33,7 +39,7 @@ def tag_and_push_image():
 
 def pull_image():
     client = get_docker_client()
-    image_to_pull = f"{registry}/my_alpine:latest"
+    image_to_pull = f"{registry}/test_alpine:latest"
     image = client.images.pull(image_to_pull)
     print(f"Pulled image: {image.tags}")
 
