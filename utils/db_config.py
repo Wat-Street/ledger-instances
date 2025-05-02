@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from sqlalchemy import (
     ARRAY,
     NUMERIC,
@@ -17,7 +19,8 @@ DB_PASSWORD = "watstreet"
 DB_HOST = "6.tcp.ngrok.io"
 DB_PORT = "18946"
 
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+# ?sslmode=disable disables GSSAPI
+engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable")
 
 metadata = MetaData()
 
