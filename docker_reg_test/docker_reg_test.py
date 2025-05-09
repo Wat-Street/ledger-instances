@@ -15,8 +15,8 @@ def tag_and_push_image():
     """
     Tags a Docker image with a new name/tag and pushes it to a registry.
     """
-    image_name = "alpine:latest"
-    target_image = f"{registry}/test-alpine:latest"
+    image_name = "busybox:latest"
+    target_image = f"{registry}/test-busybox:latest"
     try:
         client = get_docker_client()
 
