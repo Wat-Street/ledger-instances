@@ -16,11 +16,10 @@ from sqlalchemy.dialects.postgresql import JSONB
 DB_NAME = "ledger_db"
 DB_USER = "ledger_instances"
 DB_PASSWORD = "watstreet"
-DB_HOST = "6.tcp.ngrok.io"
-DB_PORT = "18946"
+DB_HOST = "localhost"
+DB_PORT = "5432"
 
-# ?sslmode=disable disables GSSAPI
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable")
+engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 metadata = MetaData()
 
