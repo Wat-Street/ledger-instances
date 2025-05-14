@@ -8,10 +8,8 @@ from utils.github_utils import recursive_repo_clone
 from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
 from utils.ledger_manager import start_ledger
 from datetime import datetime, timezone
-from dotenv import load_dotenv
 import yfinance as yf
 
-load_dotenv()
 API_KEY = os.environ.get("LEDGER_API_KEY")
 
 ORDERBOOKS_TABLE_NAME = "order_books_v2"
