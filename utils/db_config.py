@@ -11,11 +11,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import JSONB
 
-DB_NAME = "postgres"
-DB_USER = "reebxu"
+DB_NAME = "ledger_db"
+DB_USER = "ledger_instances"
 DB_PASSWORD = "watstreet"
+DB_HOST = "localhost"
+DB_PORT = "5432"
 
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@localhost:5432/{DB_NAME}")
+engine = create_engine(f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 metadata = MetaData()
 
