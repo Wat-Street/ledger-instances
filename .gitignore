@@ -162,3 +162,4 @@ cython_debug/
 *.env
 *.env.local
 temporary_model_storage/
+docker_images/
