@@ -3,9 +3,18 @@ import glob
 from flask import Flask, jsonify, request
 from sqlalchemy import select, insert, delete, update
 from utils.db_config import get_db_connection, ledger
-from utils.docker_utils import build_docker_image, run_docker_container, stop_docker_container
+from utils.docker_utils import (
+    build_docker_image,
+    run_docker_container,
+    stop_docker_container,
+    push_image_to_registry,
+)
 from utils.github_utils import recursive_repo_clone
-from utils.ledger_utils import calculate_new_balance, get_current_price, calculate_total_value
+from utils.ledger_utils import (
+    calculate_new_balance,
+    get_current_price,
+    calculate_total_value,
+)
 from utils.ledger_manager import start_ledger
 from datetime import datetime, timezone
 import yfinance as yf
@@ -43,8 +52,7 @@ def create_ledger():
         # pull algorithm into local
         temp_model_store = "temporary_model_storage"
         recursive_repo_clone(algo_path, temp_model_store)
-        print(
-            f"Successfully pulled algo {name} repo to temporary model storage")
+        print(f"Successfully pulled algo {name} repo to temporary model storage")
 
         # paths to pull algorithm and store image
         path_to_algo = f"{temp_model_store}"
@@ -57,6 +65,11 @@ def create_ledger():
 
         # build docker image
         image = build_docker_image(name, path_to_algo)
+        print(f"Built Docker image for '{name}'")
+
+        # push image to Docker registry
+        registry_image_path = push_image_to_registry(name)
+        print(f"Pushed Docker image for '{name}' to registry at {registry_image_path}")
 
         # save image as .tar to path_to_image_store
         with open(path_to_image_store, "wb") as image_tar:
@@ -84,7 +97,12 @@ def create_ledger():
         # start ledger after creation
         response, status_code = start_ledger(name)
 
-        return jsonify({"info": f"Ledger '{name}' has been created.", "start_status": response}), status_code
+        return (
+            jsonify(
+                {"info": f"Ledger '{name}' has been created.", "start_status": response}
+            ),
+            status_code,
+        )
 
     except Exception as e:
         print(e)
@@ -131,8 +149,8 @@ def delete_ledger():
 
     if not name:
         return {
-                "Error": f"You did not specify a ledger name. Usage: `/delete_ledger?name=insert_name`"
-            }, 400
+            "Error": f"You did not specify a ledger name. Usage: `/delete_ledger?name=insert_name`"
+        }, 400
 
     with get_db_connection() as conn:
         # check if the ledger exists in the database
@@ -160,7 +178,7 @@ def update_ledger():
     - name: name of the algorithm
     - trades: list of trades
     - value: dict of current stock values
-    - balance: current balance 
+    - balance: current balance
     This function takes the output of a model's trade function and updates the corresponding ledger instance's record.
     """
     # validate API key
@@ -176,7 +194,14 @@ def update_ledger():
 
     # validate required fields
     if None in [name, new_trades, new_holdings]:
-        return jsonify({"error": "Missing required fields. Please provide name, trades, and holding."}), 400
+        return (
+            jsonify(
+                {
+                    "error": "Missing required fields. Please provide name, trades, and holding."
+                }
+            ),
+            400,
+        )
 
     try:
         with get_db_connection() as conn:
@@ -185,7 +210,14 @@ def update_ledger():
             result = conn.execute(stmt).fetchone()
 
             if not result:
-                return jsonify({"error": f"You are trying to update a ledger called '{name}' that does not exist."}), 404
+                return (
+                    jsonify(
+                        {
+                            "error": f"You are trying to update a ledger called '{name}' that does not exist."
+                        }
+                    ),
+                    404,
+                )
 
             # update trades
             updated_trades = result.trades + new_trades
