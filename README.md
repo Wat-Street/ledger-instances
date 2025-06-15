@@ -3,6 +3,13 @@
 ## Overview
 Ledger instances allow the ML team to forward-test their algorithms. An API and database are hosted on the PC that allows members to create instances of Ledgers and tie specific algorithms to trade on them.
 
+## Architecture Diagrams
+### User Endpoints
+![Ledger Software Architecture](https://github.com/user-attachments/assets/2a9cac2a-7bd0-446c-8cdb-fec982467540)
+
+### Model Interaction
+![Ledger Software Architecture Interaction (1)](https://github.com/user-attachments/assets/34e724dd-d48e-419f-b9f0-fefa9386c170)
+
 ## API Features
 1. **`create_ledger`**
     To create a ledger.
@@ -88,13 +95,6 @@ class Model:
 Some considerations:
 - It is the responsibility of the algorithm to not violate the ledger (ie. sell more than you own or buy more than the money you have)
 - In case the algorithm violates the ledger, return an exception. The algorithm must be able to deal with these standard exceptions. 
-
-## Architecture Diagrams
-### User Endpoints
-![Ledger Software Architecture](https://github.com/user-attachments/assets/2a9cac2a-7bd0-446c-8cdb-fec982467540)
-
-### Model Interaction
-![Ledger Software Architecture Interaction (1)](https://github.com/user-attachments/assets/34e724dd-d48e-419f-b9f0-fefa9386c170)
 
 ## Data Formats (TODO:)
 **KEEP THIS UPDATED AT ALL TIMES.** 
